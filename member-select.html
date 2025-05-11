@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>メンバー選択</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; }
+    h2 { margin-bottom: 10px; }
+    .buttons-top button {
+      margin: 5px;
+      padding: 10px 15px;
+      font-size: 14px;
+    }
+    .member-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 20px;
+    }
+    .member-btn {
+      margin: 5px;
+      padding: 10px 15px;
+      border: 1px solid #aaa;
+      border-radius: 5px;
+      background-color: white;
+      position: relative;
+    }
+    .member-btn.selected {
+      background-color: yellow;
+    }
+    .delete-icon {
+      position: absolute;
+      top: -8px;
+      right: -8px;
+      background: red;
+      color: white;
+      border-radius: 50%;
+      padding: 0 5px;
+      cursor: pointer;
+      display: none;
+    }
+    .member-btn.deletable .delete-icon {
+      display: block;
+    }
+    #addInputArea {
+      margin-top: 20px;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+<!-- manifest の読み込み -->
+<link rel="manifest" href="manifest.json" />
+
+<!-- PWA対応のmeta -->
+<meta name="theme-color" content="#1f8f1f" />
+
+<!-- サービスワーカー登録 -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js');
+    });
+  }
+</script>
+
+</head>
+<body>
+  <h2>メンバー選択</h2>
+
+  <div class="buttons-top">
+    <button onclick="confirmSelection()">決定</button>
+    <button onclick="toggleSelectionMode()">メンバー選択</button>
+    <button onclick="showAddMemberInput()">メンバー追加</button>
+    <button onclick="toggleDeleteMode()">メンバー削除</button>
+  </div>
+
+  <div id="addInputArea" style="display: none;">
+    <input type="text" id="newMemberName" placeholder="名前を入力" />
+    <button onclick="addMember()">OK</button>
+  </div>
+
+  <div class="member-buttons" id="memberButtons"></div>
+
+  <script>
+    let members = JSON.parse(localStorage.getItem("members")) || [];
+    let selectedMembers = JSON.parse(localStorage.getItem("selectedMembers")) || [];
+    let isDeleteMode = false;
+    let isSelectionMode = true;
+
+    const renderMembers = () => {
+      const container = document.getElementById("memberButtons");
+      container.innerHTML = "";
+      members.forEach(name => {
+        const btn = document.createElement("button");
+        btn.className = "member-btn";
+        btn.textContent = name;
+        if (selectedMembers.includes(name)) btn.classList.add("selected");
+
+// ↓この部分だけ変更・確認しておけばOKです
+
+btn.onclick = () => {
+  if (isDeleteMode) return;
+  if (!isSelectionMode) return;
+
+  if (selectedMembers.includes(name)) {
+    selectedMembers = selectedMembers.filter(n => n !== name);
+  } else {
+    if (selectedMembers.length >= 6) { // ← 6人までに制限
+      alert("6人まで選択できます。");
+      return;
+    }
+    selectedMembers.push(name);
+  }
+  updateStorage();
+  renderMembers();
+};
+
+        // 削除アイコン
+        const deleteIcon = document.createElement("span");
+        deleteIcon.className = "delete-icon";
+        deleteIcon.textContent = "×";
+        deleteIcon.onclick = (e) => {
+          e.stopPropagation();
+          if (confirm("削除しますか？")) {
+            members = members.filter(n => n !== name);
+            selectedMembers = selectedMembers.filter(n => n !== name);
+            updateStorage();
+            renderMembers();
+          }
+        };
+
+        if (isDeleteMode) {
+          btn.classList.add("deletable");
+          btn.appendChild(deleteIcon);
+        }
+
+        container.appendChild(btn);
+      });
+    };
+
+    const updateStorage = () => {
+      localStorage.setItem("members", JSON.stringify(members));
+      localStorage.setItem("selectedMembers", JSON.stringify(selectedMembers));
+    };
+
+    const confirmSelection = () => {
+      if (selectedMembers.length < 3) {
+        alert("3人以上選んでください。");
+        return;
+      }
+      updateStorage();
+      window.location.href = "index.html"; // トップ画面に戻る
+    };
+
+    const toggleSelectionMode = () => {
+      isSelectionMode = true;
+      isDeleteMode = false;
+      renderMembers();
+    };
+
+    const toggleDeleteMode = () => {
+      isDeleteMode = !isDeleteMode;
+      isSelectionMode = false;
+      renderMembers();
+    };
+
+    const showAddMemberInput = () => {
+      document.getElementById("addInputArea").style.display = "block";
+    };
+
+    const addMember = () => {
+      const input = document.getElementById("newMemberName");
+      const name = input.value.trim();
+      if (name && !members.includes(name)) {
+        members.push(name);
+        updateStorage();
+        input.value = "";
+        renderMembers();
+      }
+    };
+
+    window.onload = () => {
+      renderMembers();
+    };
+  </script>
+</body>
+</html>

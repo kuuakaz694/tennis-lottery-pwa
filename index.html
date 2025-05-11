@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>テニスの順番くじ</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; text-align: center; }
+    h1 { margin-bottom: 20px; }
+    .member-list { margin-bottom: 20px; }
+    .member-slot {
+      display: flex;
+      align-items: center;
+      margin: 5px auto;
+      max-width: 300px;
+      border: 1px solid #ccc;
+      padding: 10px;
+      border-radius: 5px;
+      justify-content: flex-start;
+    }
+    .member-slot span { margin-right: 10px; font-weight: bold; }
+    button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 16px;
+    }
+  </style>
+  <link rel="stylesheet" href="style.css" />
+<!-- manifest の読み込み -->
+<link rel="manifest" href="manifest.json" />
+
+<!-- PWA対応のmeta -->
+<meta name="theme-color" content="#1f8f1f" />
+
+<!-- サービスワーカー登録 -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js');
+    });
+  }
+</script>
+
+</head>
+<body>
+  <h1>テニスの順番くじ</h1>
+
+  <div class="member-list" id="memberList">
+    <!-- 6枠を初期表示（空白） -->
+    <div class="member-slot"><span>1.</span><div class="name"></div></div>
+    <div class="member-slot"><span>2.</span><div class="name"></div></div>
+    <div class="member-slot"><span>3.</span><div class="name"></div></div>
+    <div class="member-slot"><span>4.</span><div class="name"></div></div>
+    <div class="member-slot"><span>5.</span><div class="name"></div></div>
+    <div class="member-slot"><span>6.</span><div class="name"></div></div>
+  </div>
+
+  <button onclick="goToMemberSelection()">メンバー選択</button>
+  <button onclick="startLottery()">くじスタート</button>
+
+  <script>
+    let selectedMembers = [];
+
+    function goToMemberSelection() {
+      window.location.href = "member-select.html"; // 選択画面へ
+    }
+
+    function startLottery() {
+      const shuffled = selectedMembers
+        .slice()
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 6);
+      const slots = document.querySelectorAll(".member-slot .name");
+      for (let i = 0; i < 6; i++) {
+        slots[i].textContent = shuffled[i] || "";
+      }
+    }
+
+    // 初回ロード時、localStorageから読み込み
+    window.onload = () => {
+      const saved = JSON.parse(localStorage.getItem("selectedMembers"));
+      if (saved) selectedMembers = saved;
+    };
+  </script>
+</body>
+</html>

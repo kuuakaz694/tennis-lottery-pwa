@@ -1,0 +1,70 @@
+/* 背景画像と全体の基本スタイル */
+body {
+  background-image: url('tennis-court.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  font-family: sans-serif;
+  padding: 20px;
+  text-align: center;
+  color: rgb(35, 80, 38);
+}
+
+/* 見出し */
+h1, h2 {
+  margin-bottom: 20px;
+}
+
+/* ボタン全般 */
+button {
+  padding: 10px 15px;
+  font-size: 16px;
+  margin: 5px;
+  border-radius: 5px;
+  border: none;
+  cursor: pointer;
+}
+
+/* トップ画面のメンバー枠 */
+.member-slot {
+  background-color: rgba(255, 255, 255, 0.8);
+  color: black;
+  padding: 10px;
+  margin: 5px auto;
+  max-width: 300px;
+  border-radius: 8px;
+  text-align: left;
+  font-size: 16px;
+}
+
+/* メンバー選択画面のボタン */
+.member-btn {
+  margin: 5px;
+  padding: 10px 15px;
+  border: 1px solid #aaa;
+  border-radius: 5px;
+  background-color: white;
+  position: relative;
+  color: black;
+}
+
+.member-btn.selected {
+  background-color: yellow;
+}
+
+/* 削除用 × ボタン */
+.delete-icon {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: red;
+  color: white;
+  border-radius: 50%;
+  padding: 0 5px;
+  cursor: pointer;
+  display: none;
+}
+
+.member-btn.deletable .delete-icon {
+  display: block;
+}
